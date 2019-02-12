@@ -7,13 +7,18 @@ class webserverHandler(BaseHTTPRequestHandler):
             if self.path.endswith('\hello'):
                 pass
         except KeyboardInterrupt as e:
-            print('Error: ',)
+            print('Error: ', e)
 
 
 def main():
-    port = 8080
-    server = HTTPServer(('', port), webserverHandler)
-    server.serve_forever()
+    try:
+        port = 8080
+        server = HTTPServer(('', port), webserverHandler)
+        print('Server running on port %s' % port)
+        server.serve_forever()
+    except KeyboardInterrupt as e:
+        print('^C entered, stopping web server...')
+        server.socket.close()
 
 if __name__ == "__main__":
     main()
