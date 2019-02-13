@@ -2,18 +2,25 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 class webserverHandler(BaseHTTPRequestHandler):
+    
     def do_GET(self):
+        def hello():
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            output = ''
+            output += '<html><body>Hello!</body></html>'
+            self.wfile.write(output.encode())
+            print(output)
+            return
         try:
             if self.path.endswith('/hello'):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
+                hello()
+            else:
+                self.send_response(301)
+                self.send_header('Location', webserverHandler)
                 self.end_headers()
-
-                output = ''
-                output += '<html><body>Hello!</body></html>'
-                self.wfile.write(output.encode())
-                print(output)
-                return
         except IOError:
             self.send_error(404, 'File Not Found %s', self.path)
 
