@@ -1,4 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import cgi
+import cgitb
+cgitb.enable()
 
 
 class webserverHandler(BaseHTTPRequestHandler):
@@ -25,7 +28,7 @@ class webserverHandler(BaseHTTPRequestHandler):
             output += '<html><body>Hola <a href="/hello">Back to Hello</a></body></html>'
             self.wfile.write(output.encode())
             print(output)
-            return        
+            return
 
         try:
             if self.path.endswith('/hello'):
@@ -39,9 +42,13 @@ class webserverHandler(BaseHTTPRequestHandler):
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
 
+
     def do_POST(self):
         try:
-            pass
+            self.send_response(200)
+            self.send_header()
+            self.end_headers()
+
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
 
@@ -55,6 +62,7 @@ def main():
     except KeyboardInterrupt as e:
         print('^C entered, stopping web server...')
         server.socket.close()
+
 
 if __name__ == "__main__":
     main()
