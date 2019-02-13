@@ -14,10 +14,25 @@ class webserverHandler(BaseHTTPRequestHandler):
             self.wfile.write(output.encode())
             print(output)
             return
+
+
+        def hola():
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            output = ''
+            output += '<html><body>Hola <a href="/hello">Back to Hello</a></body></html>'
+            self.wfile.write(output.encode())
+            print(output)
+            return        
+
         try:
             if self.path.endswith('/hello'):
                 hello()
-            else:
+            if self.path.endswith('/hola'):
+                hola()
+            if self.path.endswith('/'):
                 self.send_response(301)
                 self.send_header('Location', webserverHandler)
                 self.end_headers()
