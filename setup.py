@@ -36,7 +36,13 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_response(301)
                 self.send_header('Location', webserverHandler)
                 self.end_headers()
-        except IOError:
+        except IOError as e:
+            self.send_error(404, 'File Not Found %s', self.path)
+
+    def do_POST(self):
+        try:
+            pass
+        except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
 
 
