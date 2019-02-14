@@ -2,53 +2,80 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import cgi
 import cgitb
 cgitb.enable()
+from io import BytesIO
 
 
 class webserverHandler(BaseHTTPRequestHandler):
-    
+    """Fetch definition of http method."""
     def do_GET(self):
+        """Run http GET request."""
         def hello():
+            """Present hello.html."""
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-
             output = ''
             output += '<html><body>Hello!</body></html>'
+            output += '''<form method = "POST" enctype = "multipart/form-data" 
+            actiion = "hello"><h2>What would you like me tosay?</h2><input name
+             = "message" type = "text"><input type = "submit" value = "Submit">
+             </form>'''
             self.wfile.write(output.encode())
             print(output)
             return
-
-
         def hola():
+            """Present hola.html."""
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
             output = ''
             output += '<html><body>Hola <a href="/hello">Back to Hello</a></body></html>'
+            output += '''<form method = "POST" enctype = "multipart/form-data" 
+            actiion = "hello"><h2>What would you like me tosay?</h2><input name
+             = "message" type = "text"><input type = "submit" value = "Submit">
+             </form>'''
             self.wfile.write(output.encode())
             print(output)
             return
-
         try:
             if self.path.endswith('/hello'):
                 hello()
+                return
             if self.path.endswith('/hola'):
                 hola()
+                return
             if self.path.endswith('/'):
                 self.send_response(301)
                 self.send_header('Location', webserverHandler)
                 self.end_headers()
+                return
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
-
-
     def do_POST(self):
         try:
             self.send_response(200)
-            self.send_header()
+            #self.send_header('Content-type', 'text/html')
             self.end_headers()
-
+            c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
+            content_len = int(self.headers.get('Content-length'))
+            p_dict['boundary'] = bytes(p_dict['boundary'], "utf-8")
+            p_dict['CONTENT-LENGTH'] = content_len
+            message_content = ''
+            if c_type == 'multipart/form-data':
+                fields = cgi.parse_multipart(self.rfile, p_dict)
+                message_content = fields.get('message')
+            output = ''
+            output += '<html><body>'
+            output += '<h2> Okay, how about this: </h2>'
+            output += '<h1>{}</h1>'.format(message_content[0])
+            output += '''<form method = "POST" enctype = "multipart/form-data" 
+            actiion = "hello"><h2>What would you like me to say?</h2><input name
+             = "message" type = "text"><input type = "submit" value = "Submit">
+             </form>'''
+            output += '</html></body>'
+            self.wfile.write(output.encode())
+            print(output)
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
 
