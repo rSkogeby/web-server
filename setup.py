@@ -51,11 +51,15 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.end_headers()
 
                 db = ['Mario\'s', 'Pellegrino']
-                output = ''
+                output = '<h1>'
                 for entry in db:
-                    output += '<h1>{}</h1>&nbsp;'.format(entry)
+                    output += '{}'.format(entry)
+                    output += '<br />'
+                output += '</h1>'
+
                     
-                self.wfile.write()
+                self.wfile.write(output.encode())
+                return
             if self.path.endswith('/'):
                 self.send_response(301)
                 self.send_header('Location', webserverHandler)
