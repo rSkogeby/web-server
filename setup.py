@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import cgi
 import cgitb
 cgitb.enable()
-from io import BytesIO
+#import sqlalchemy
 
 
 class webserverHandler(BaseHTTPRequestHandler):
@@ -45,6 +45,17 @@ class webserverHandler(BaseHTTPRequestHandler):
             if self.path.endswith('/hola'):
                 hola()
                 return
+            if self.path.endswith('/restaurant'):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                db = ['Mario\'s', 'Pellegrino']
+                output = ''
+                for entry in db:
+                    output += '<h1>{}</h1>&nbsp;'.format(entry)
+                    
+                self.wfile.write()
             if self.path.endswith('/'):
                 self.send_response(301)
                 self.send_header('Location', webserverHandler)
@@ -68,7 +79,7 @@ class webserverHandler(BaseHTTPRequestHandler):
             output = ''
             output += '<html><body>'
             output += '<h2> Okay, how about this: </h2>'
-            output += '<h1>{}</h1>'.format(message_content[0])
+            output += '<h1>{}</h1>'.format(message_content[0].decode())
             output += '''<form method = "POST" enctype = "multipart/form-data" 
             actiion = "hello"><h2>What would you like me to say?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
