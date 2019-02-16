@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import cgi
 import cgitb
 cgitb.enable()
+from io import BytesIO
 
 from db_setup import Base, Restaurant, MenuItem
 
@@ -77,7 +78,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
-
     def do_POST(self):
         try:
             self.send_response(200)
