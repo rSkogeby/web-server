@@ -1,8 +1,17 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import cgi
 import cgitb
 cgitb.enable()
-#import sqlalchemy
+
+from db_setup import Base, Restaurant, MenuItem
+
+
+engine = create_engine('sqlite:///restaurantmenu.db')
+Base.metadata.bind = engine
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 
 
 class webserverHandler(BaseHTTPRequestHandler):
@@ -16,13 +25,14 @@ class webserverHandler(BaseHTTPRequestHandler):
             self.end_headers()
             output = ''
             output += '<html><body>Hello!</body></html>'
-            output += '''<form method = "POST" enctype = "multipart/form-data" 
+            output += '''<form method = "POST" enctype = "multipart/form-data"
             actiion = "hello"><h2>What would you like me tosay?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
              </form>'''
             self.wfile.write(output.encode())
             print(output)
             return
+
         def hola():
             """Present hola.html."""
             self.send_response(200)
@@ -30,8 +40,9 @@ class webserverHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             output = ''
-            output += '<html><body>Hola <a href="/hello">Back to Hello</a></body></html>'
-            output += '''<form method = "POST" enctype = "multipart/form-data" 
+            output += '''<html><body>Hola <a href="/hello">Back to Hello</a>
+            </body></html>'''
+            output += '''<form method = "POST" enctype = "multipart/form-data"
             actiion = "hello"><h2>What would you like me tosay?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
              </form>'''
@@ -57,7 +68,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                     output += '<br />'
                 output += '</h1>'
 
-                    
                 self.wfile.write(output.encode())
                 return
             if self.path.endswith('/'):
@@ -67,10 +77,10 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
+
     def do_POST(self):
         try:
             self.send_response(200)
-            #self.send_header('Content-type', 'text/html')
             self.end_headers()
             c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
             content_len = int(self.headers.get('Content-length'))
@@ -84,8 +94,8 @@ class webserverHandler(BaseHTTPRequestHandler):
             output += '<html><body>'
             output += '<h2> Okay, how about this: </h2>'
             output += '<h1>{}</h1>'.format(message_content[0].decode())
-            output += '''<form method = "POST" enctype = "multipart/form-data" 
-            actiion = "hello"><h2>What would you like me to say?</h2><input name
+            output += '''<form method = "POST" enctype = "multipart/form-data"
+            action = "hello"><h2>What would you like me to say?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
              </form>'''
             output += '</html></body>'
