@@ -1,3 +1,11 @@
 # Web Server
+Web server for demonstrating basic CRUD operations on a local database.
 
-- When user visits /restaurants all restaurants in db are printed.
+## Requirements
+- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [cgi](https://docs.python.org/3/library/cgi.html)
+- restaurantmenu.db
+- setup.py
+- db_setup.py
+
+## Usage
