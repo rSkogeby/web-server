@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 import cgi
 import cgitb
 cgitb.enable()
-import re
 
 from db_setup import Base, Restaurant, MenuItem
 
@@ -13,44 +12,7 @@ class webserverHandler(BaseHTTPRequestHandler):
     """Fetch definition of http method."""
     def do_GET(self):
         """Run http GET request."""
-        def hello():
-            """Present hello.html."""
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            output = ''
-            output += '<html><body>Hello!</body></html>'
-            output += '''<form method = "POST" enctype = "multipart/form-data"
-            action = "hello"><h2>What would you like me to say?</h2><input name
-             = "message" type = "text"><input type = "submit" value = "Submit">
-             </form>'''
-            self.wfile.write(output.encode())
-            print(output)
-            return
-
-        def hola():
-            """Present hola.html."""
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-
-            output = ''
-            output += '''<html><body>Hola <a href="/hello">Back to Hello</a>
-            </body></html>'''
-            output += '''<form method = "POST" enctype = "multipart/form-data"
-            action = "hello"><h2>What would you like me to say?</h2><input name
-             = "message" type = "text"><input type = "submit" value = "Submit">
-             </form>'''
-            self.wfile.write(output.encode())
-            print(output)
-            return
         try:
-            if self.path.endswith('/hello'):
-                hello()
-                return
-            if self.path.endswith('/hola'):
-                hola()
-                return
             if self.path.endswith('/restaurant'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -75,7 +37,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 self.wfile.write(output.encode())
                 return
-            if self.path.endswith('/restaurant/new'):
+            elif self.path.endswith('/restaurant/new'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -90,7 +52,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += '</html></body>'    
                 self.wfile.write(output.encode())
                 return
-            if self.path.endswith('/edit'):
+            elif self.path.endswith('/edit'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -114,7 +76,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output.encode())
                 session.close()
                 return
-            if self.path.endswith('/delete'):
+            elif self.path.endswith('/delete'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -138,16 +100,16 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output.encode())
                 session.close()
                 return
-            if self.path.endswith('/'):
+            else:
                 self.send_response(301)
-                self.send_header('Location', '/hello')#webserverHandler)
+                self.send_header('Location', '/restaurant')
                 self.end_headers()
                 return
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
     def do_POST(self):
-        if self.path.endswith('/restaurant'):
-            try:
+        try:
+            if self.path.endswith('/restaurant'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers
@@ -168,14 +130,11 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += '<h2> Okay, how about this: </h2>'
                 output += '<h1>{}</h1>'.format(message_content[0].decode())
                 output += '''<form method = "POST" enctype = "multipart/form-data"
-                action = "hello"><h2>What would you like me to say?</h2><input name
-                = "message" type = "text"><input type = "submit" value = "Submit">
-                </form>'''
+                    action = "hello"><h2>What would you like me to say?</h2><input name
+                    = "message" type = "text"><input type = "submit" value = "Submit">
+                    </form>'''
                 output += '</html></body>'
-            except IOError as e:
-                self.send_error(404, 'File Not Found %s', self.path)
-        elif self.path.endswith('/restaurant/new'):
-            try:
+            elif self.path.endswith('/restaurant/new'):
                 c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
                 content_len = int(self.headers.get('Content-length'))
                 p_dict['boundary'] = bytes(p_dict['boundary'], "utf-8")
@@ -197,47 +156,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Location', '/restaurant')
                 self.end_headers()
                 return
-            except IOError as e:
-                self.send_error(404, 'File Not Found %s', self.path)
-        elif self.path.endswith('/edit'):
-            c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
-            content_len = int(self.headers.get('Content-length'))
-            p_dict['boundary'] = bytes(p_dict['boundary'], "utf-8")
-            p_dict['CONTENT-LENGTH'] = content_len
-            message_content = ''
-            if c_type == 'multipart/form-data':
-                fields = cgi.parse_multipart(self.rfile, p_dict)
-                new_name = fields.get('restaurantName')
-            engine = create_engine('sqlite:///restaurantmenu.db')
-            Base.metadata.bind = engine
-            DBSession = sessionmaker(bind=engine)
-            session = DBSession()
-            restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
-            restaurant.name = new_name[0].decode()
-            session.add(restaurant)
-            session.commit()
-            session.close()
-            self.send_response(301)
-            self.send_header('Content-type', 'text/html')
-            self.send_header('Location', '/restaurant')
-            self.end_headers()
-        elif self.path.endswith('/delete'):
-            engine = create_engine('sqlite:///restaurantmenu.db')
-            Base.metadata.bind = engine
-            DBSession = sessionmaker(bind=engine)
-            session = DBSession()
-            restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
-            session.delete(restaurant)
-            session.commit()
-            session.close()
-            self.send_response(301)
-            self.send_header('Content-type', 'text/html')
-            self.send_header('Location', '/restaurant')
-            self.end_headers()
-        else:
-            try:
-                self.send_response(200)
-                self.end_headers()
+            elif self.path.endswith('/edit'):
                 c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
                 content_len = int(self.headers.get('Content-length'))
                 p_dict['boundary'] = bytes(p_dict['boundary'], "utf-8")
@@ -245,19 +164,40 @@ class webserverHandler(BaseHTTPRequestHandler):
                 message_content = ''
                 if c_type == 'multipart/form-data':
                     fields = cgi.parse_multipart(self.rfile, p_dict)
-                    message_content = fields.get('message')
-                output = ''
-                output += '<html><body>'
-                output += '<h2> Okay, how about this: </h2>'
-                output += '<h1>{}</h1>'.format(message_content[0].decode())
-                output += '''<form method = "POST" enctype = "multipart/form-data"
-                action = "hello"><h2>What would you like me to say?</h2><input name
-                = "message" type = "text"><input type = "submit" value = "Submit">
-                </form>'''
-                output += '</html></body>'
-                self.wfile.write(output.encode())
-            except IOError as e:
-                self.send_error(404, 'File Not Found %s', self.path)
+                    new_name = fields.get('restaurantName')
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
+                restaurant.name = new_name[0].decode()
+                session.add(restaurant)
+                session.commit()
+                session.close()
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.send_header('Location', '/restaurant')
+                self.end_headers()
+            elif self.path.endswith('/delete'):
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
+                session.delete(restaurant)
+                session.commit()
+                session.close()
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.send_header('Location', '/restaurant')
+                self.end_headers()
+            else:
+                self.send_response(301)
+                self.send_header('Location','/')
+                self.end_headers()
+                return
+        except IOError as e:
+            self.send_error(404, 'File Not Found %s', self.path)
 
 def main():
     try:
