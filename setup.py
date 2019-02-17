@@ -4,15 +4,8 @@ from sqlalchemy.orm import sessionmaker
 import cgi
 import cgitb
 cgitb.enable()
-from io import BytesIO
 
 from db_setup import Base, Restaurant, MenuItem
-
-
-engine = create_engine('sqlite:///restaurantmenu.db')
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
 
 
 class webserverHandler(BaseHTTPRequestHandler):
@@ -61,13 +54,17 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
-
-                db = ['Mario\'s', 'Pellegrino']
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                db = session.query(Restaurant).all()
                 output = '<h1>'
                 for entry in db:
-                    output += '{}'.format(entry)
+                    output += '{}'.format(entry.name)
                     output += '<br />'
                 output += '</h1>'
+                session.close()
 
                 self.wfile.write(output.encode())
                 return
