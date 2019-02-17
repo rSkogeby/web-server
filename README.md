@@ -1,7 +1,9 @@
 # Web Server
+
 Web server for demonstrating basic CRUD operations on a local database.
 
 ## Requirements
+
 - [SQLAlchemy](https://www.sqlalchemy.org/)
 - [cgi](https://docs.python.org/3/library/cgi.html)
 - restaurantmenu.db
@@ -9,6 +11,7 @@ Web server for demonstrating basic CRUD operations on a local database.
 - db_setup.py
 
 ## Usage
+
 Install SQLAlchemy:
 
 ```bash
@@ -31,3 +34,5 @@ chmod +x setup.py
 Open a browser and go to _localhost:8080_. Create, read, update and delete database entries.
 
 ## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
