@@ -115,6 +115,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
         except IOError as e:
             self.send_error(404, 'File Not Found %s', self.path)
+        return
 
     def do_POST(self):
         try:
@@ -133,7 +134,14 @@ class webserverHandler(BaseHTTPRequestHandler):
                 Base.metadata.bind = engine
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
-                new_restaurant = Restaurant(name=message_content[0].decode())
+                if type(message_content[0]) is type(b''):
+                    new_restaurant = Restaurant(
+                        name=message_content[0].decode()
+                    )
+                else:
+                    new_restaurant = Restaurant(
+                        name=message_content[0]
+                    )
                 session.add(new_restaurant)
                 session.commit()
                 session.close()
@@ -158,8 +166,11 @@ class webserverHandler(BaseHTTPRequestHandler):
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
                 restaurant = session.query(Restaurant).\
-                    filter_by(id=self.path.split('/')[2]).one()
-                restaurant.name = new_name[0].decode()
+                filter_by(id=self.path.split('/')[2]).one()
+                if type(new_name[0]) is type(b''):
+                    restaurant.name = new_name[0].decode()
+                else:
+                    restaurant.name = new_name[0]
                 session.add(restaurant)
                 session.commit()
                 session.close()
@@ -193,7 +204,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 def main():
     try:
         port = 8080
-        server = HTTPServer(('0.0.0.0', port), webserverHandler)
+        server = HTTPServer(('', port), webserverHandler)
         print('Server running on port %s' % port)
         server.serve_forever()
     except KeyboardInterrupt as e:
