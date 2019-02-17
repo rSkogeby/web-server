@@ -118,32 +118,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            if self.path.endswith('/restaurant'):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers
-                engine = create_engine('sqlite:///restaurantmenu.db')
-                Base.metadata.bind = engine
-                DBSession = sessionmaker(bind=engine)
-                session = DBSession()
-                db = session.query(Restaurant).filter_by().all()
-                output = '<h1>'
-                for entry in db:
-                    output += '{}'.format(entry.name)
-                    output += '<br />'
-                output += '</h1>'
-                session.close()
-
-                output = ''
-                output += '<html><body>'
-                output += '<h2> Okay, how about this: </h2>'
-                output += '<h1>{}</h1>'.format(message_content[0].decode())
-                output += '''<form method="POST" enctype="multipart/form-data"
-                    action="hello"><h2>What would you like me to say?</h2>
-                    <input name="message" type="text">
-                    <input type="submit" value="Submit"></form>'''
-                output += '</html></body>'
-            elif self.path.endswith('/restaurant/new'):
+            if self.path.endswith('/restaurant/new'):
                 c_type, p_dict = cgi.parse_header(
                     self.headers.get('Content-Type')
                 )
@@ -218,7 +193,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 def main():
     try:
         port = 8080
-        server = HTTPServer(('', port), webserverHandler)
+        server = HTTPServer(('0.0.0.0', port), webserverHandler)
         print('Server running on port %s' % port)
         server.serve_forever()
     except KeyboardInterrupt as e:
