@@ -158,7 +158,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                 if c_type == 'multipart/form-data':
                     fields = cgi.parse_multipart(self.rfile, p_dict)
                     message_content = fields.get('newRestaurantName')
-                    print(message_content)
                 engine = create_engine('sqlite:///restaurantmenu.db')
                 Base.metadata.bind = engine
                 DBSession = sessionmaker(bind=engine)
@@ -175,10 +174,27 @@ class webserverHandler(BaseHTTPRequestHandler):
             except IOError as e:
                 self.send_error(404, 'File Not Found %s', self.path)
         elif self.path.endswith('/edit'):
-            
+            c_type, p_dict = cgi.parse_header(self.headers.get('Content-Type'))
+            content_len = int(self.headers.get('Content-length'))
+            p_dict['boundary'] = bytes(p_dict['boundary'], "utf-8")
+            p_dict['CONTENT-LENGTH'] = content_len
+            message_content = ''
+            if c_type == 'multipart/form-data':
+                fields = cgi.parse_multipart(self.rfile, p_dict)
+                new_name = fields.get('restaurantName')
+            engine = create_engine('sqlite:///restaurantmenu.db')
+            Base.metadata.bind = engine
+            DBSession = sessionmaker(bind=engine)
+            session = DBSession()
+            restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
+            restaurant.name = new_name[0].decode()
+            session.add(restaurant)
+            session.commit()
+            session.close()
             self.send_response(301)
             self.send_header('Content-type', 'text/html')
             self.send_header('Location', '/restaurant')
+            self.end_headers()
         else:
             try:
                 self.send_response(200)
