@@ -20,7 +20,7 @@ class webserverHandler(BaseHTTPRequestHandler):
             output = ''
             output += '<html><body>Hello!</body></html>'
             output += '''<form method = "POST" enctype = "multipart/form-data"
-            actiion = "hello"><h2>What would you like me tosay?</h2><input name
+            action = "hello"><h2>What would you like me to say?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
              </form>'''
             self.wfile.write(output.encode())
@@ -37,7 +37,7 @@ class webserverHandler(BaseHTTPRequestHandler):
             output += '''<html><body>Hola <a href="/hello">Back to Hello</a>
             </body></html>'''
             output += '''<form method = "POST" enctype = "multipart/form-data"
-            actiion = "hello"><h2>What would you like me to say?</h2><input name
+            action = "hello"><h2>What would you like me to say?</h2><input name
              = "message" type = "text"><input type = "submit" value = "Submit">
              </form>'''
             self.wfile.write(output.encode())
@@ -71,7 +71,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
             if self.path.endswith('/'):
                 self.send_response(301)
-                self.send_header('Location', webserverHandler)
+                self.send_header('Location', '/hello')#webserverHandler)
                 self.end_headers()
                 return
         except IOError as e:
