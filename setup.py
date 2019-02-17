@@ -58,11 +58,11 @@ class webserverHandler(BaseHTTPRequestHandler):
                 Base.metadata.bind = engine
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
-                db = session.query(Restaurant).all()
+                restaurants = session.query(Restaurant).all()
                 output = '<h1>'
-                for entry in db:
-                    output += '{}'.format(entry.name)
-                    output += ''
+                for restaurant in restaurants:
+                    output += '{}   <a href="#">Edit</a> | \
+                                  <a href="#">Delete</a>'.format(restaurant.name)
                     output += '<br />'
                 output += '</h1>'
                 session.close()
@@ -99,11 +99,36 @@ class webserverHandler(BaseHTTPRequestHandler):
                 </form>'''
                 output += '</html></body>'
                 self.wfile.write(output.encode())
-                print(output)
             except IOError as e:
                 self.send_error(404, 'File Not Found %s', self.path)
         if self.path.endswith('/restaurant'):
-            pass
+            try:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                db = session.query(Restaurant).filter_by().all()
+                output = '<h1>'
+                for entry in db:
+                    output += '{}'.format(entry.name)
+                    output += '<br />'
+                output += '</h1>'
+                session.close()
+
+                output = ''
+                output += '<html><body>'
+                output += '<h2> Okay, how about this: </h2>'
+                output += '<h1>{}</h1>'.format(message_content[0].decode())
+                output += '''<form method = "POST" enctype = "multipart/form-data"
+                action = "hello"><h2>What would you like me to say?</h2><input name
+                = "message" type = "text"><input type = "submit" value = "Submit">
+                </form>'''
+                output += '</html></body>'
+            except IOError as e:
+                self.send_error(404, 'File Not Found %s', self.path)
 
 
 def main():
