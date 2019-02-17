@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Host a web server.
-
-Web server implementing SQLAlchemy to demonstrate basic CRUD operations.
-"""
+'''Web server for demonstrating basic CRUD operations on a local database.'''
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from sqlalchemy import create_engine
