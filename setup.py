@@ -59,14 +59,32 @@ class webserverHandler(BaseHTTPRequestHandler):
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
                 restaurants = session.query(Restaurant).all()
-                output = '<h1>'
+                output = '<html><body>'
+                output += '<h4>'
+                output += '<a href="/restaurant/new">Make a New Restaurant</a>'
+                output += '</h4>'
                 for restaurant in restaurants:
-                    output += '{}   <a href="#">Edit</a> | \
+                    output += '{} <a href="#">Edit</a> | \
                                   <a href="#">Delete</a>'.format(restaurant.name)
                     output += '<br />'
-                output += '</h1>'
+                output += '</html></body>'
                 session.close()
 
+                self.wfile.write(output.encode())
+                return
+            if self.path.endswith('/restaurant/new'):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                output = '<html><body>'
+                output += '<h4>'
+                output += '<a href="/restaurant">Back to restaurant list</a>'
+                output += '</h4>'
+                output += '''<form method = "POST" enctype = "multipart/form-data"
+                action = "/restaurant/new"><h2>Enter new restaurant name: </h2><input name
+                = "message" type = "text"><input type = "submit" value = "Create">
+                </form>'''
+                output += '</html></body>'    
                 self.wfile.write(output.encode())
                 return
             if self.path.endswith('/'):
@@ -102,6 +120,34 @@ class webserverHandler(BaseHTTPRequestHandler):
             except IOError as e:
                 self.send_error(404, 'File Not Found %s', self.path)
         if self.path.endswith('/restaurant'):
+            try:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                db = session.query(Restaurant).filter_by().all()
+                output = '<h1>'
+                for entry in db:
+                    output += '{}'.format(entry.name)
+                    output += '<br />'
+                output += '</h1>'
+                session.close()
+
+                output = ''
+                output += '<html><body>'
+                output += '<h2> Okay, how about this: </h2>'
+                output += '<h1>{}</h1>'.format(message_content[0].decode())
+                output += '''<form method = "POST" enctype = "multipart/form-data"
+                action = "hello"><h2>What would you like me to say?</h2><input name
+                = "message" type = "text"><input type = "submit" value = "Submit">
+                </form>'''
+                output += '</html></body>'
+            except IOError as e:
+                self.send_error(404, 'File Not Found %s', self.path)
+        if self.path.endswith('/restaurant/new'):
             try:
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
