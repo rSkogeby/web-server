@@ -65,8 +65,10 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += '<a href="/restaurant/new">Make a New Restaurant</a>'
                 output += '</h4>'
                 for restaurant in restaurants:
-                    output += '{} <a href="/restaurant/{}/edit">Edit</a> | \
-                                  <a href="#">Delete</a>'.format(restaurant.name,restaurant.id)
+                    output += '''{} <a href="/restaurant/{}/edit">Edit</a> | 
+                                  <a href="/restaurant/{}/delete">Delete</a>'''\
+                                      .format(restaurant.name, restaurant.id,
+                                      restaurant.id)
                     output += '<br />'
                 output += '</html></body>'
                 session.close()
@@ -109,6 +111,30 @@ class webserverHandler(BaseHTTPRequestHandler):
                 = "restaurantName" type = "text"><input type = "submit" value = "Change">
                 </form>'''
                 output += '</html></body>'    
+                self.wfile.write(output.encode())
+                session.close()
+                return
+            if self.path.endswith('/delete'):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                engine = create_engine('sqlite:///restaurantmenu.db')
+                Base.metadata.bind = engine
+                DBSession = sessionmaker(bind=engine)
+                session = DBSession()
+                restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
+                output = '<html><body>'
+                output += '<h4>'
+                output += '<a href="/restaurant">Back to restaurant list</a>'
+                output += '</h4>'
+                output += '<h3>'
+                output += '{}'.format(restaurant.name)
+                output += '</h3>'
+                output += '''<form method="POST" enctype="multipart/form-data"
+                action="delete"><h4>By pressing confirm this restaurant will be
+                permanently removed from the database. </h4><button type="submit"
+                name="confirm" value="True">Confirm</button>'''
+                output += '</html></body>'
                 self.wfile.write(output.encode())
                 session.close()
                 return
@@ -189,6 +215,19 @@ class webserverHandler(BaseHTTPRequestHandler):
             restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
             restaurant.name = new_name[0].decode()
             session.add(restaurant)
+            session.commit()
+            session.close()
+            self.send_response(301)
+            self.send_header('Content-type', 'text/html')
+            self.send_header('Location', '/restaurant')
+            self.end_headers()
+        elif self.path.endswith('/delete'):
+            engine = create_engine('sqlite:///restaurantmenu.db')
+            Base.metadata.bind = engine
+            DBSession = sessionmaker(bind=engine)
+            session = DBSession()
+            restaurant = session.query(Restaurant).filter_by(id=self.path.split('/')[2]).one()
+            session.delete(restaurant)
             session.commit()
             session.close()
             self.send_response(301)
