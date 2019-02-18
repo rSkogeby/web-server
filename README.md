@@ -1,6 +1,6 @@
 # Web Server
 
-Web server for demonstrating basic CRUD operations on a local database.
+Web server implementing SQLAlchemy to demonstrate basic CRUD operations.
 
 ## Requirements
 
