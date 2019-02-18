@@ -16,6 +16,7 @@ from db_setup import Base, Restaurant, MenuItem
 
 class webserverHandler(BaseHTTPRequestHandler):
     """Fetch definition of http method."""
+
     def do_GET(self):
         """Run http GET request."""
         try:
@@ -118,6 +119,7 @@ class webserverHandler(BaseHTTPRequestHandler):
         return
 
     def do_POST(self):
+        """Change methods for creating, updating and deleting db entries."""
         try:
             if self.path.endswith('/restaurant/new'):
                 c_type, p_dict = cgi.parse_header(
@@ -134,7 +136,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 Base.metadata.bind = engine
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
-                if type(message_content[0]) is type(b''):
+                if isinstance(message_content[0], type(b'')):
                     new_restaurant = Restaurant(
                         name=message_content[0].decode()
                     )
@@ -166,8 +168,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                 DBSession = sessionmaker(bind=engine)
                 session = DBSession()
                 restaurant = session.query(Restaurant).\
-                filter_by(id=self.path.split('/')[2]).one()
-                if type(new_name[0]) is type(b''):
+                    filter_by(id=self.path.split('/')[2]).one()
+                if isinstance(new_name[0], type(b'')):
                     restaurant.name = new_name[0].decode()
                 else:
                     restaurant.name = new_name[0]
@@ -202,6 +204,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
 
 def main():
+    """Serve up an http server on port 8080."""
     try:
         port = 8080
         server = HTTPServer(('', port), webserverHandler)
